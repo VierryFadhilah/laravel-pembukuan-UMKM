@@ -11,25 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->string("name");
-            $table->text("description");
+            $table->string('name');
+            $table->text('description');
             $table->timestamps();
         });
+
         Schema::create('access', function (Blueprint $table) {
             $table->id();
-            $table->string("name");
-            $table->string("slug");
+            $table->string('name');
+            $table->string('slug');
             $table->timestamps();
         });
+
         Schema::create('roles_access', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("roles_id");
+            $table->unsignedBigInteger('roles_id');
             $table->unsignedBigInteger('access_id');
-            $table->foreign("roles_id")->references('id')->on('roles');
-            $table->foreign('access_id')->references('id')->on('access');
+            $table->foreign('roles_id')->references('id')->on('roles')->onDelete('cascade');
+            $table->foreign('access_id')->references('id')->on('access')->onDelete('cascade');
             $table->timestamps();
         });
 
@@ -37,8 +38,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->unsignedBigInteger('roles_id')->nullable(true);
-            $table->foreign('roles_id')->references('id')->on('roles');
+            $table->unsignedBigInteger('roles_id')->nullable();
+            $table->foreign('roles_id')->references('id')->on('roles')->onDelete('set null');
             $table->string('password');
             $table->timestamps();
         });
@@ -50,6 +51,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
+        Schema::dropIfExists('roles_access');
+        Schema::dropIfExists('access');
         Schema::dropIfExists('roles');
     }
 };

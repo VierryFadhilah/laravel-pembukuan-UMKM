@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Roles;
+use App\Models\RolesAccess;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RolesController extends Controller
 {
@@ -62,24 +64,48 @@ class RolesController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|unique:roles|max:255',
-            'description' => 'required|string|max:255',
-            'access' => 'array',
-        ]);
+        // Memulai transaksi database
+        DB::beginTransaction();
 
-        $access = $request->access;
+        try {
+            // Proses validasi data
+            $data = $request->validate([
+                'name' => 'required|string|unique:roles|max:255',
+                'description' => 'required|string|max:255',
+                'access' => 'required|array',
+            ]);
 
-        foreach ($access as $key => $value) {
+            // Membuat role baru
+            $roles = Roles::create($data);
+
+            // Mendapatkan akses dari request
+            $access = $request->input('access', []);
+
+            // Menyimpan akses yang terkait dengan role
+            foreach ($access as $value) {
+                $rolesAccess = new RolesAccess();
+                $rolesAccess->roles_id = $roles->id;
+                $rolesAccess->access_id = $value;
+                $rolesAccess->save();
+            }
+
+            // Commit transaksi jika sukses
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Roles berhasil disimpan',
+                'data' => $roles
+            ], 201);
+        } catch (\Exception $e) {
+            // Rollback transaksi jika terjadi kesalahan
+            DB::rollback();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal menyimpan roles: ' . $e->getMessage()
+            ], 500);
         }
-
-        $roles = Roles::create($data);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Roles berhasil disimpan',
-            'data' => $roles
-        ], 201);
     }
 
     /**

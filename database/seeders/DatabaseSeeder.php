@@ -2,11 +2,9 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,51 +13,46 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Menyisipkan data ke tabel 'access'
         DB::table('access')->insert([
-            'id' => 1,
             'name' => 'dashboard',
             'slug' => 'Dashboard',
         ]);
         DB::table('access')->insert([
-            'id' => 2,
             'name' => 'keuangan',
             'slug' => 'Keuangan',
         ]);
         DB::table('access')->insert([
-            'id' => 3,
             'name' => 'pembukuan',
             'slug' => 'Pembukuan',
         ]);
         DB::table('access')->insert([
-            'id' => 4,
             'name' => 'akses',
             'slug' => 'Akses',
         ]);
+
+        // Menyisipkan data ke tabel 'roles'
         DB::table('roles')->insert([
-            'id' => 1,
             'name' => 'owner',
             'description' => 'Membuka Semua Menu',
         ]);
-        DB::table('roles_access')->insert([
-            'roles_id' => 1,
-            'access_id' => 1
-        ]);
-        DB::table('roles_access')->insert([
-            'roles_id' => 1,
-            'access_id' => 2
-        ]);
-        DB::table('roles_access')->insert([
-            'roles_id' => 1,
-            'access_id' => 3
-        ]);
-        DB::table('roles_access')->insert([
-            'roles_id' => 1,
-            'access_id' => 4
-        ]);
+
+        // Menyisipkan data ke tabel 'roles_access'
+        $accessIds = [1, 2, 3, 4]; // ID akses dari tabel 'access' yang ingin dihubungkan dengan peran 'owner'
+        $roleId = 1; // ID peran 'owner'
+
+        foreach ($accessIds as $accessId) {
+            DB::table('roles_access')->insert([
+                'roles_id' => $roleId,
+                'access_id' => $accessId,
+            ]);
+        }
+
+        // Menyisipkan data ke tabel 'users'
         DB::table('users')->insert([
-            'name' => "test",
-            'email' => "test" . '@gmail.com',
-            'roles_id' => 1,
+            'name' => 'test',
+            'email' => 'test@gmail.com',
+            'roles_id' => $roleId,
             'password' => Hash::make('password'),
         ]);
     }
