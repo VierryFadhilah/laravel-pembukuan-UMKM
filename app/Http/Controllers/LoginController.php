@@ -20,14 +20,13 @@ class LoginController extends Controller
             $user = Auth::user();
 
 
-            $token = $user->createToken('Token Name');
+            $token = $user->createToken('Token Name')->plainTextToken;
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Login berhasil',
                 'data' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
+                    'user' => $user,
                     'token' => $token
                 ]
             ]);

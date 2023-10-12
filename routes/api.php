@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,18 +21,20 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-Route::get('/login',function () {
-    return ;
+Route::get('/login', function () {
+    return;
 })->name("login");
 
 Route::post('/login', [LoginController::class, "index"]);
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
-    Route::get('/users', [UsersController::class, "index"] );
+    // Akses
 
-    Route::post('/users', [UsersController::class, "store"]);
+    // Roles
+    Route::resource('roles', RolesController::class);
 
+
+    // User
+    Route::resource('/users', UsersController::class);
 });
-
-

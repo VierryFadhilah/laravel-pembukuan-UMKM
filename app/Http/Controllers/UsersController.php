@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Roles;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -10,24 +11,34 @@ class UsersController extends Controller
 
     public function index(Request $request)
     {
-        $search = $request->search;
-        $limit = $request->limit;
-        $sort = $request->sort ?? 'name'; // Gunakan 'name' sebagai nilai default untuk pengurutan
-        $order = $request->order ?? 'asc'; // Gunakan 'asc' (ascending) sebagai nilai default untuk urutan
+        // Menggunakan default values untuk parameter
+        $search = $request->input('search', '');
+        $limit = $request->input('limit', 10); // Default limit adalah 10, bisa disesuaikan
+        $sort = $request->input('sort', 'users.name'); // Menentukan dari tabel mana kolom 'name' diambil
+        $order = $request->input('order', 'asc');
 
-        $users = User::select('name', 'email', 'roles')
-            ->where('name', 'like', '%' . $search . '%')
-            ->orWhere('email', 'like', '%' . $search . '%')
-            ->orWhere('roles', 'like', '%' . $search . '%');
+        // Query untuk mengambil data pengguna dengan kolom-kolom yang diinginkan
+        $users = User::select('users.id', 'users.name', 'users.email')
+            ->addSelect('roles.name as roles_name')
+            ->leftJoin('roles', 'users.roles_id', '=', 'roles.id')
+            ->where(function ($query) use ($search) {
+                $query->where('users.name', 'like', '%' . $search . '%') // Menentukan bahwa kolom 'name' diambil dari tabel 'users'
+                    ->orWhere('users.email', 'like', '%' . $search . '%') // Menentukan bahwa kolom 'email' diambil dari tabel 'users'
+                    ->orWhere('roles.name', 'like', '%' . $search . '%'); // Menentukan bahwa kolom 'email' diambil dari tabel 'users'
+            });
 
+        // Mengurutkan hasil jika sort dan order disediakan
         if ($sort && $order) {
             $users->orderBy($sort, $order);
         }
 
+        // Melakukan paginasi
         $users = $users->paginate($limit);
 
+        // Menambahkan parameter ke hasil paginasi
         $users->appends(['limit' => $limit, 'search' => $search, 'sort' => $sort, 'order' => $order]);
 
+        // Mengembalikan response JSON
         $data = [
             'status' => 'success',
             'message' => 'Berhasil ambil data dengan paginasi',
@@ -36,6 +47,8 @@ class UsersController extends Controller
 
         return response()->json($data, 200);
     }
+
+
 
 
     public function store(Request $request)

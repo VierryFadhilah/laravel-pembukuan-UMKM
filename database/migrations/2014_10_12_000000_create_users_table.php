@@ -11,13 +11,35 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string("name");
+            $table->text("description");
+            $table->timestamps();
+        });
+        Schema::create('access', function (Blueprint $table) {
+            $table->id();
+            $table->string("name");
+            $table->string("slug");
+            $table->timestamps();
+        });
+        Schema::create('roles_access', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger("roles_id");
+            $table->unsignedBigInteger('access_id');
+            $table->foreign("roles_id")->references('id')->on('roles');
+            $table->foreign('access_id')->references('id')->on('access');
+            $table->timestamps();
+        });
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->unsignedBigInteger('roles_id')->nullable(true);
+            $table->foreign('roles_id')->references('id')->on('roles');
             $table->string('password');
-            $table->rememberToken();
             $table->timestamps();
         });
     }
@@ -28,5 +50,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
+        Schema::dropIfExists('roles');
     }
 };
