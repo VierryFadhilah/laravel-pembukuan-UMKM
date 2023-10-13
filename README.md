@@ -10,8 +10,8 @@ request:
 
 ```json
 {
-    "email": "",
-    "password": "kata_sandi_rahasia"
+    "email": "test@gmail.com",
+    "password": "password"
 }
 ```
 
@@ -22,9 +22,15 @@ response :
     "status": "success",
     "message": "Login berhasil",
     "data": {
-        "id": 123,
-        "name": "pengguna_contoh",
-        "token": "token_access_jwt"
+        "user": {
+            "id": 1,
+            "name": "test",
+            "email": "test@gmail.com",
+            "roles_id": 1,
+            "created_at": null,
+            "updated_at": null
+        },
+        "token": "2|Qrv7YQyeyrBPeTYrZgfYd4P77u5mFESp3X9uOURj9073a11c"
     }
 }
 ```
@@ -54,10 +60,10 @@ request:
 
 ```json
 {
-    "name": "pengguna_baru",
-    "email": "contoh@contoh.com",
-    "password": "kata_sandi_rahasia",
-    "roles": 0
+    "name": "pengguna 4",
+    "email": "test4@mail.com",
+    "password": "password",
+    "roles_id": 1
 }
 ```
 
@@ -66,11 +72,13 @@ response :
 ```json
 {
     "status": "success",
-    "message": "Pengguna berhasil dibuat.",
+    "message": "Pengguna berhasil disimpan",
     "data": {
-        "id": 124,
-        "name": "pengguna_baru",
-        "email": "contoh@contoh.com"
+        "name": "pengguna 4",
+        "email": "test4@mail.com",
+        "updated_at": "2023-10-13T08:51:52.000000Z",
+        "created_at": "2023-10-13T08:51:52.000000Z",
+        "id": 2
     }
 }
 ```
@@ -92,29 +100,66 @@ EndPoint: /api/users
 
 params :
 
-    limit=
-    search=
-    page=
+    limit:10
+    sort:name
+    order:desc
+    page:1
+    search:o
 
 response :
 
 ```json
 {
     "status": "success",
-    "message": "success ambil data",
-    "data": [
-        {
-            "id": 0,
-            "name": "",
-            "email": "",
-            "roles": ""
-        },
-        ... //sebanyak limit
-    ]
+    "message": "Berhasil ambil data dengan paginasi",
+    "data": {
+        "current_page": 1,
+        "data": [
+            {
+                "id": 1,
+                "name": "test",
+                "email": "test@gmail.com",
+                "roles_name": "owner"
+            },
+            {
+                "id": 2,
+                "name": "pengguna 4",
+                "email": "test4@mail.com",
+                "roles_name": null
+            }
+        ],
+        "first_page_url": "http://127.0.0.1:8000/api/users?limit=10&search=o&sort=name&order=desc&page=1",
+        "from": 1,
+        "last_page": 1,
+        "last_page_url": "http://127.0.0.1:8000/api/users?limit=10&search=o&sort=name&order=desc&page=1",
+        "links": [
+            {
+                "url": null,
+                "label": "&laquo; Previous",
+                "active": false
+            },
+            {
+                "url": "http://127.0.0.1:8000/api/users?limit=10&search=o&sort=name&order=desc&page=1",
+                "label": "1",
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "Next &raquo;",
+                "active": false
+            }
+        ],
+        "next_page_url": null,
+        "path": "http://127.0.0.1:8000/api/users",
+        "per_page": 10,
+        "prev_page_url": null,
+        "to": 2,
+        "total": 2
+    }
 }
 ```
 
-## Get One User
+## GET ONE USER
 
 Method: GET
 
@@ -125,13 +170,14 @@ response :
 ```json
 {
     "status": "success",
-    "message": "success ambil data",
+    "message": "User found",
     "data": {
-        "id": 0,
-        "name": "",
-        "email": "",
-        "roles": "",
-        "password": ""
+        "id": 2,
+        "name": "pengguna 4",
+        "email": "test4@mail.com",
+        "roles_id": null,
+        "created_at": "2023-10-13T08:51:52.000000Z",
+        "updated_at": "2023-10-13T08:51:52.000000Z"
     }
 }
 ```
@@ -140,17 +186,15 @@ response :
 
 Method : PUT
 
-Endpoint : /users/:id
+Endpoint : api//users/:id
 
 request:
 
 ```json
 {
-    "id": 0,
-    "name": "pengguna_baru",
-    "email": "contoh@contoh.com",
-    "password": "kata_sandi_rahasia",
-    "roles": 0
+    "name": "pengguna 555",
+    "email": "test555@mail.com",
+    "roles_id": 2
 }
 ```
 
@@ -159,12 +203,30 @@ response :
 ```json
 {
     "status": "success",
-    "message": "Pengguna berhasil diUpdate.",
+    "message": "User Berhasil di update",
     "data": {
-        "user_id": 124,
-        "username": "pengguna_baru",
-        "email": "contoh@contoh.com"
+        "id": 10,
+        "name": "pengguna 555",
+        "email": "test555@mail.com",
+        "roles_id": 2,
+        "created_at": "2023-10-13T09:31:56.000000Z",
+        "updated_at": "2023-10-13T09:32:48.000000Z"
     }
+}
+```
+
+## DELETE USER
+
+Method : DELETE
+
+EndPoint: /api/users/:id
+
+response:
+
+```json
+{
+    "status": "success",
+    "message": "User berhasil dihapus"
 }
 ```
 
@@ -178,9 +240,9 @@ request:
 
 ```json
 {
-    "name": "",
-    "desc": "",
-    "access": []
+    "name": "karyawan",
+    "description": "membuka menu Keuangan",
+    "access": [1, 2]
 }
 ```
 
@@ -189,15 +251,18 @@ response :
 ```json
 {
     "status": "success",
-    "message": "Roles berhasil dibuat.",
+    "message": "Roles berhasil disimpan",
     "data": {
-        "id": 124,
-        "name": ""
+        "name": "karyawan",
+        "description": "membuka menu Keuangan",
+        "updated_at": "2023-10-13T09:34:47.000000Z",
+        "created_at": "2023-10-13T09:34:47.000000Z",
+        "id": 4
     }
 }
 ```
 
-## Get Roles
+## GET ROLES
 
 Method: GET
 
@@ -205,24 +270,60 @@ EndPoint: /api/roles
 
 params :
 
-    limit=
-    search=
-    page=
+    limit:10
+    sort:name
+    order:desc
+    page:1
+    search:a
 
 response :
 
 ```json
 {
     "status": "success",
-    "message": "success ambil data",
-    "data": [
-        {
-            "id": 0,
-            "name": "",
-            "desc": "",
-        },
-        ... //sebanyak limit
-    ]
+    "message": "Berhasil ambil data dengan paginasi",
+    "data": {
+        "current_page": 1,
+        "data": [
+            {
+                "id": 2,
+                "name": "kasir2",
+                "description": "membuka menu karywan"
+            },
+            {
+                "id": 4,
+                "name": "karyawan",
+                "description": "membuka menu Keuangan"
+            }
+        ],
+        "first_page_url": "http://127.0.0.1:8000/api/roles?limit=10&search=a&sort=name&order=desc&page=1",
+        "from": 1,
+        "last_page": 1,
+        "last_page_url": "http://127.0.0.1:8000/api/roles?limit=10&search=a&sort=name&order=desc&page=1",
+        "links": [
+            {
+                "url": null,
+                "label": "&laquo; Previous",
+                "active": false
+            },
+            {
+                "url": "http://127.0.0.1:8000/api/roles?limit=10&search=a&sort=name&order=desc&page=1",
+                "label": "1",
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "Next &raquo;",
+                "active": false
+            }
+        ],
+        "next_page_url": null,
+        "path": "http://127.0.0.1:8000/api/roles",
+        "per_page": 10,
+        "prev_page_url": null,
+        "to": 2,
+        "total": 2
+    }
 }
 ```
 
@@ -237,20 +338,19 @@ response :
 ```json
 {
     "status": "success",
-    "message": "success ambil data",
+    "message": "Role found",
     "data": {
-        "id": 0,
-        "name": "",
-        "desc": "",
-        "access": [
-            "",
-            ... // sebanyak accesss
-        ],
+        "id": 4,
+        "name": "karyawan",
+        "description": "membuka menu Keuangan",
+        "created_at": "2023-10-13T09:34:47.000000Z",
+        "updated_at": "2023-10-13T09:34:47.000000Z",
+        "access": [1, 2]
     }
 }
 ```
 
-## Update Roles
+## UPDATE ROLES
 
 Method : PUT
 
@@ -260,10 +360,9 @@ request:
 
 ```json
 {
-    "id": 0,
-    "name": "",
-    "desc": "",
-    "access": []
+    "name": "karyawan 2",
+    "description": "membuka menu karywan",
+    "access": [1, 2, 3]
 }
 ```
 
@@ -272,10 +371,28 @@ response :
 ```json
 {
     "status": "success",
-    "message": "Roles berhasil Diupdate.",
+    "message": "Role updated successfully",
     "data": {
-        "id": 124,
-        "name": ""
+        "id": 2,
+        "name": "karyawan 2",
+        "description": "membuka menu karywan",
+        "created_at": "2023-10-12T18:31:58.000000Z",
+        "updated_at": "2023-10-13T09:45:52.000000Z"
     }
+}
+```
+
+## DELETE ROLES
+
+Method: DELETE
+
+EndPoint: /api/roles/:id
+
+response :
+
+```json
+{
+    "status": "success",
+    "message": "Role delete successfully"
 }
 ```

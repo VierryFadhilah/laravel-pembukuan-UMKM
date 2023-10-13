@@ -29,8 +29,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('roles_id');
             $table->unsignedBigInteger('access_id');
-            $table->foreign('roles_id')->references('id')->on('roles')->onDelete('cascade');
-            $table->foreign('access_id')->references('id')->on('access')->onDelete('cascade');
+            $table->foreign('roles_id')->references('id')->on('roles')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('access_id')->references('id')->on('access')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
 
@@ -39,7 +39,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->unsignedBigInteger('roles_id')->nullable();
-            $table->foreign('roles_id')->references('id')->on('roles')->onDelete('set null');
+            $table->foreign('roles_id')->references('id')->on('roles')->onDelete('set null')->onUpdate('cascade');
             $table->string('password');
             $table->timestamps();
         });

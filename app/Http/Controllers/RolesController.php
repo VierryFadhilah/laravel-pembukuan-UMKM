@@ -72,7 +72,7 @@ class RolesController extends Controller
             $data = $request->validate([
                 'name' => 'required|string|unique:roles|max:255',
                 'description' => 'required|string|max:255',
-                'access' => 'required|array',
+                'access' => 'array',
             ]);
 
             // Membuat role baru
@@ -111,10 +111,49 @@ class RolesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+
+    public function show(?string $id)
     {
-        //
+        try {
+
+            if ($id === "null") {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Role found',
+                    'data' => [
+                        'name' => "null",
+                        'id' => null
+                    ]
+                ], 200);
+            }
+            // Cari peran berdasarkan ID
+            $role = Roles::findOrFail($id);
+
+            // Menggabungkan data akses terkait dengan peran
+            $access = RolesAccess::where('roles_id', $role->id)->pluck('access_id') ?? null;
+
+            // Mengembalikan data peran dan akses terkait dalam respons JSON
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Role found',
+                'data' => [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'description' => $role->description,
+                    'created_at' => $role->created_at,
+                    'updated_at' => $role->updated_at,
+                    'access' => $access
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            // Jika peran tidak ditemukan, tangkap pengecualian dan beri respons 404 Not Found
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Role not found'
+            ], 404);
+        }
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -129,7 +168,53 @@ class RolesController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // Memulai transaksi database
+        DB::beginTransaction();
+
+        try {
+            $data = $request->validate([
+                'name' => 'required|string|max:255|unique:roles,name,' . $id,
+                'description' => 'required|string|max:255',
+                'access' => 'array',
+            ]);
+
+            $roles = Roles::find($id);
+
+            if (!$roles) {
+                return response()->json(['message' => 'Role not found'], 404);
+            }
+
+            $roles->name = $data['name'];
+            $roles->description = $data['description'];
+            $roles->save();
+
+            // Menyinkronkan akses jika ada dalam request
+            RolesAccess::where('roles_id', $id)->delete();
+
+            // Mendapatkan akses dari request
+            $access = $request->input('access', []);
+
+            // Menyimpan akses yang terkait dengan role
+            foreach ($access as $value) {
+                $rolesAccess = new RolesAccess();
+                $rolesAccess->roles_id = $roles->id;
+                $rolesAccess->access_id = $value;
+                $rolesAccess->save();
+            }
+
+            // Commit transaksi jika sukses
+            DB::commit();
+
+            return response()->json(['status' => 'success', 'message' => 'Role updated successfully', 'data' => $roles], 200);
+        } catch (\Exception $e) {
+            // Rollback transaksi jika terjadi kesalahan
+            DB::rollback();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal menyimpan roles: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -137,6 +222,25 @@ class RolesController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        DB::beginTransaction();
+        try {
+
+
+            $roles = Roles::findOrFail($id);
+            $roles->delete();
+
+            // Commit transaksi jika sukses
+            DB::commit();
+
+            return response()->json(['status' => 'success', 'message' => 'Role delete successfully']);
+        } catch (\Exception $e) {
+            // Rollback transaksi jika terjadi kesalahan
+            DB::rollback();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal menghapus roles: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

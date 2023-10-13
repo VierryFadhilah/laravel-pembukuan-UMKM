@@ -50,6 +50,7 @@ class DatabaseSeeder extends Seeder
 
         // Menyisipkan data ke tabel 'users'
         DB::table('users')->insert([
+            'id' => 1,
             'name' => 'test',
             'email' => 'test@gmail.com',
             'roles_id' => $roleId,
