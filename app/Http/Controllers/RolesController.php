@@ -17,11 +17,11 @@ class RolesController extends Controller
         // Menggunakan default values untuk parameter
         $search = $request->input('search', '');
         $limit = $request->input('limit', 10); // Default limit adalah 10, bisa disesuaikan
-        $sort = $request->input('sort', 'name'); // Menentukan dari tabel mana kolom 'name' diambil
-        $order = $request->input('order', 'asc');
+        $sort = $request->sort ?? 'updated_at'; // Menentukan dari tabel mana kolom 'updated_at' diambil
+        $order = $request->order ?? 'desc';
 
         // Query untuk mengambil data pengguna dengan kolom-kolom yang diinginkan
-        $roles = Roles::select('id', 'name', 'description')
+        $roles = Roles::select('id', 'name', 'description', 'updated_at')
             ->where('name', '!=', 'owner') // Memastikan 'name' bukan 'owner'
             ->where(function ($query) use ($search) {
                 $query->where('name', 'like', '%' . $search . '%') // Menentukan bahwa kolom 'name' diambil dari tabel 'users'

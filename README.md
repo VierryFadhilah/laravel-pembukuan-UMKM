@@ -396,3 +396,41 @@ response :
     "message": "Role delete successfully"
 }
 ```
+
+## CREATE TRANSAKSI
+
+Method : post
+
+Endpoint : /api/transaksi
+
+request :
+
+```json
+{
+    "tanggal_transaksi": "15-10-2023 00:12:19",
+    "description": "duit masuk",
+    "user_id": 1,
+    "jenis": "pemasukan",
+    "kategori_id": 21,
+    "nominal": 20000
+}
+```
+
+response
+
+```json
+{
+    "status": "success",
+    "message": "Transaksi berhasil disimpan",
+    "data": {
+        "user_id": 1,
+        "tanggal_transaksi": "2023-10-15 00:00:00",
+        "kategori_id": 21,
+        "description": "duit masuk",
+        "nominal": 20000,
+        "updated_at": "2023-10-15T12:35:00.000000Z",
+        "created_at": "2023-10-15T12:35:00.000000Z",
+        "id": 14
+    }
+}
+```

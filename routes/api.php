@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\AccessController;
+use App\Http\Controllers\KategoriTransaksiController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RolesController;
+use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -37,4 +40,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // User
     Route::resource('users', UsersController::class);
+
+    // Access
+    Route::resource('access', AccessController::class);
+
+    // Transaki
+
+    Route::resource('transaksi', TransaksiController::class);
+
+    // Kategori Transaksi
+
+    Route::resource('kategori_transaksi', KategoriTransaksiController::class);
 });

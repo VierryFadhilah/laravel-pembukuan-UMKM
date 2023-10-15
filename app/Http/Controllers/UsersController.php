@@ -10,42 +10,53 @@ class UsersController extends Controller
 
     public function index(Request $request)
     {
-        // Menggunakan default values untuk parameter
-        $search = $request->input('search', '');
-        $limit = $request->input('limit', 10); // Default limit adalah 10, bisa disesuaikan
-        $sort = $request->sort ?? 'users.updated_at'; // Menentukan dari tabel mana kolom 'name' diambil
-        $order = $request->order ?? 'desc';
 
-        // Query untuk mengambil data pengguna dengan kolom-kolom yang diinginkan
-        $users = User::select('users.id', 'users.name', 'users.email', 'users.updated_at')
-            ->addSelect('roles.name as roles_name')
-            ->leftJoin('roles', 'users.roles_id', '=', 'roles.id')
-            ->where('users.id', '!=', 1)
-            ->where(function ($query) use ($search) {
-                $query->where('users.name', 'like', '%' . $search . '%') // Menentukan bahwa kolom 'name' diambil dari tabel 'users'
-                    ->orWhere('users.email', 'like', '%' . $search . '%') // Menentukan bahwa kolom 'email' diambil dari tabel 'users'
-                    ->orWhere('roles.name', 'like', '%' . $search . '%'); // Menentukan bahwa kolom 'email' diambil dari tabel 'users'
-            });
+        try {
+            // Menggunakan default values untuk parameter
+            $search = $request->input('search', '');
+            $limit = $request->input('limit', 10); // Default limit adalah 10, bisa disesuaikan
+            $sort = $request->sort ?? 'users.updated_at'; // Menentukan dari tabel mana kolom 'name' diambil
+            $order = $request->order ?? 'desc';
 
-        // Mengurutkan hasil jika sort dan order disediakan
-        if ($sort && $order) {
-            $users->orderBy($sort, $order);
+            // Query untuk mengambil data pengguna dengan kolom-kolom yang diinginkan
+            $users = User::select('users.id', 'users.name', 'users.email', 'users.updated_at')
+                ->addSelect('roles.name as roles_name')
+                ->leftJoin('roles', 'users.roles_id', '=', 'roles.id')
+                ->where('users.id', '!=', 1)
+                ->where(function ($query) use ($search) {
+                    $query->where('users.name', 'like', '%' . $search . '%') // Menentukan bahwa kolom 'name' diambil dari tabel 'users'
+                        ->orWhere('users.email', 'like', '%' . $search . '%') // Menentukan bahwa kolom 'email' diambil dari tabel 'users'
+                        ->orWhere('roles.name', 'like', '%' . $search . '%'); // Menentukan bahwa kolom 'email' diambil dari tabel 'users'
+                });
+
+            // Mengurutkan hasil jika sort dan order disediakan
+            if ($sort && $order) {
+                $users->orderBy($sort, $order);
+            }
+
+            // Melakukan paginasi
+            $users = $users->paginate($limit);
+
+            // Menambahkan parameter ke hasil paginasi
+            $users->appends(['limit' => $limit, 'search' => $search, 'sort' => $sort, 'order' => $order]);
+
+            // Mengembalikan response JSON
+            $data = [
+                'status' => 'success',
+                'message' => 'Berhasil ambil data dengan paginasi',
+                'data' => $users
+            ];
+
+            return response()->json($data, 200);
+        } catch (\Exception $e) {
+            // Mengatasi error dan mengembalikan response JSON dengan pesan error
+            $errorData = [
+                'status' => 'error',
+                'message' => 'Gagal mengambil data: ' . $e->getMessage()
+            ];
+
+            return response()->json($errorData, 500);
         }
-
-        // Melakukan paginasi
-        $users = $users->paginate($limit);
-
-        // Menambahkan parameter ke hasil paginasi
-        $users->appends(['limit' => $limit, 'search' => $search, 'sort' => $sort, 'order' => $order]);
-
-        // Mengembalikan response JSON
-        $data = [
-            'status' => 'success',
-            'message' => 'Berhasil ambil data dengan paginasi',
-            'data' => $users
-        ];
-
-        return response()->json($data, 200);
     }
 
     public function show(string $id)
